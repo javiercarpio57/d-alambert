@@ -159,8 +159,8 @@ export default {
       const newIzquierda = this.fIzquierda.replace(new RegExp('t', 'g'), this.contador);
       const newDerecha = this.fDerecha.replace(new RegExp('t', 'g'), this.contador);
 
-      const dataIzq = this.xInterval.map(num => this.evaluateFunction(num, newIzquierda));
-      const dataDer = this.xInterval.map(num => this.evaluateFunction(num, newDerecha));
+      const dataIzq = this.xInterval.map(num => 0.5 * this.evaluateFunction(num, newIzquierda));
+      const dataDer = this.xInterval.map(num => 0.5 * this.evaluateFunction(num, newDerecha));
 
       const indexIzq = this.selectedFunctions.indexOf('funcion f(x - ct)');
       if (indexIzq > -1) {
