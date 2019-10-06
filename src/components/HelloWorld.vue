@@ -48,6 +48,7 @@
             dark
             class="ml-2 mt-1"
             v-on:click="f()"
+            value="current"
             >
               Graficar
             </v-btn>
@@ -143,7 +144,17 @@ export default {
       clearInterval(this.interval);
       this.interval = setInterval(this.graficarDesplazamientos, 1000);
 
-      console.log(math.integral('x^2', 'x'));
+    },
+
+    integrateFunction(funcion, variable){
+     return math.integral(funcion, variable).toString();
+    },
+
+    sumFunctions(foo, bar){
+      
+      let res = math.parse(foo.toString().concat("+").concat(bar.toString())) 
+      let simple = math.simplify(res).toString()
+      return simple
     },
     evaluateFunction(x, funcion) {
       const newF = funcion.replace(new RegExp('x', 'g'), x);
@@ -187,10 +198,12 @@ export default {
     },
   },
   computed: {
+    
     displayedDatasets() {
       return this.selectedFunctions.map(year => this.datas[year]);
     },
   },
+  
 };
 </script>
 
