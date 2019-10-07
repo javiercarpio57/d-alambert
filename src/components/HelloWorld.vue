@@ -36,11 +36,19 @@
         </div>
         <div class="pl-9 d-flex flex-row align-center">
           <div class="d-flex flex-column">
-            <v-text-field
-              label="Valor C"
-              outlined
-              v-model="C"
-            ></v-text-field>
+            <div class="d-flex flex-row">
+              <v-text-field
+                label="Valor C"
+                outlined
+                v-model="C"
+              ></v-text-field>
+
+              <v-text-field
+                label="Limite en eje X"
+                outlined
+                v-model="ejeX"
+              ></v-text-field>
+            </div>
 
             <v-btn
             rounded
@@ -60,7 +68,7 @@
     <div>
       <line-chart
         :width="400"
-        :height="100"
+        :height="180"
         :labels="xInterval"
         :datasets="displayedDatasets"
       ></line-chart>
@@ -94,6 +102,7 @@ export default {
     fCombinada: '',
     C: '',
     interval: '',
+    ejeX: 50,
     contador: 10,
     selectedFunctions: [],
     datas: {
@@ -126,7 +135,7 @@ export default {
   methods: {
     f() {
       this.xInterval.length = 0;
-      for (let i = 0; i <= 50; i += 1) {
+      for (let i = 0; i <= this.ejeX; i += 1) {
         this.xInterval.push(i);
       }
 
@@ -139,22 +148,31 @@ export default {
 
       this.desplazamientoIzquierda();
       this.desplazamientoDerecha();
+      this.fCombinada = this.sumFunctions(this.fIzquierda, this.fDerecha);
 
       this.graficarDesplazamientos();
       clearInterval(this.interval);
       this.interval = setInterval(this.graficarDesplazamientos, 1000);
-
     },
-
-    integrateFunction(funcion, variable){
-     return math.integral(funcion, variable).toString();
+    integrateFunction(funcion, variable) {
+      return math.integral(funcion, variable).toString();
     },
-
-    sumFunctions(foo, bar){
-      
-      let res = math.parse(foo.toString().concat("+").concat(bar.toString())) 
-      let simple = math.simplify(res).toString()
-      return simple
+    evaluateIntegral(funcion, limitInferior, limitSuperior) {
+      const funcionIntegrada = this.integrateFunction(funcion, 'x');
+      const superior = this.evaluateFunction(
+        limitSuperior,
+        funcionIntegrada,
+      );
+      const inferior = this.evaluateFunction(
+        limitInferior,
+        funcionIntegrada,
+      );
+      return (superior - inferior);
+    },
+    sumFunctions(foo, bar) {
+      const res = math.parse(foo.toString().concat('+').concat(bar.toString()));
+      const simple = math.simplify(res).toString();
+      return simple;
     },
     evaluateFunction(x, funcion) {
       const newF = funcion.replace(new RegExp('x', 'g'), x);
@@ -169,9 +187,18 @@ export default {
     graficarDesplazamientos() {
       const newIzquierda = this.fIzquierda.replace(new RegExp('t', 'g'), this.contador);
       const newDerecha = this.fDerecha.replace(new RegExp('t', 'g'), this.contador);
+      const newComb = this.fCombinada.replace(new RegExp('t', 'g'), this.contador);
 
       const dataIzq = this.xInterval.map(num => 0.5 * this.evaluateFunction(num, newIzquierda));
       const dataDer = this.xInterval.map(num => 0.5 * this.evaluateFunction(num, newDerecha));
+      const dataComb = this.xInterval.map(
+        num => 0.5 * this.evaluateFunction(num, newComb)
+        + this.evaluateIntegral(
+          this.funcionG,
+          `((${(this.C * -1).toString()}) * ${this.contador})`,
+          `(${this.C} * ${this.contador})`,
+        ),
+      );
 
       const indexIzq = this.selectedFunctions.indexOf('funcion f(x - ct)');
       if (indexIzq > -1) {
@@ -183,27 +210,35 @@ export default {
         this.selectedFunctions.splice(indexDer, 1);
       }
 
+      const indexComb = this.selectedFunctions.indexOf('funcion combinada');
+      if (indexComb > -1) {
+        this.selectedFunctions.splice(indexComb, 1);
+      }
+
       this.selectedFunctions.push('funcion f(x - ct)');
       this.selectedFunctions.push('funcion f(x + ct)');
+      this.selectedFunctions.push('funcion combinada');
 
       this.datas['funcion f(x - ct)'].data = dataIzq;
       this.datas['funcion f(x + ct)'].data = dataDer;
+      this.datas['funcion combinada'].data = dataComb;
       this.datas['funcion f(x - ct)'].label = this.fIzquierda;
       this.datas['funcion f(x + ct)'].label = this.fDerecha;
+      this.datas['funcion combinada'].label = 'Resultado';
 
       this.contador += 1;
-      if (this.contador === 51) {
+      if (this.contador === this.ejeX + 1) {
         this.contador = 0;
       }
     },
   },
   computed: {
-    
+
     displayedDatasets() {
       return this.selectedFunctions.map(year => this.datas[year]);
     },
   },
-  
+
 };
 </script>
 
