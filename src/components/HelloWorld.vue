@@ -227,7 +227,8 @@ export default {
       this.datas['funcion combinada'].label = 'Resultado';
 
       this.contador += 1;
-      if (this.contador === this.ejeX + 1) {
+      console.log(Number(this.ejeX) + 1);
+      if (this.contador === Number(this.ejeX) + 1) {
         this.contador = 0;
       }
     },
