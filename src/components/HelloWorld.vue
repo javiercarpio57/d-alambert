@@ -193,11 +193,11 @@ export default {
       const dataDer = this.xInterval.map(num => 0.5 * this.evaluateFunction(num, newDerecha));
       const dataComb = this.xInterval.map(
         num => 0.5 * this.evaluateFunction(num, newComb)
-        + this.evaluateIntegral(
+        + (0.5 * (1 / this.C) * this.evaluateIntegral(
           this.funcionG,
-          `((${(this.C * -1).toString()}) * ${this.contador})`,
-          `(${this.C} * ${this.contador})`,
-        ),
+          `${num} + ((${(this.C * -1).toString()}) * ${this.contador})`,
+          `${num} + (${this.C} * ${this.contador})`,
+        )),
       );
 
       const indexIzq = this.selectedFunctions.indexOf('funcion f(x - ct)');
@@ -227,7 +227,6 @@ export default {
       this.datas['funcion combinada'].label = 'Resultado';
 
       this.contador += 1;
-      console.log(Number(this.ejeX) + 1);
       if (this.contador === Number(this.ejeX) + 1) {
         this.contador = 0;
       }
@@ -236,7 +235,7 @@ export default {
   computed: {
 
     displayedDatasets() {
-      return this.selectedFunctions.map(year => this.datas[year]);
+      return this.selectedFunctions.map(f => this.datas[f]);
     },
   },
 
